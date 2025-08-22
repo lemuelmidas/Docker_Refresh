@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template_string
+from flask import Flask, request
 
 app = Flask(__name__)
 
@@ -25,6 +25,10 @@ HTML_FORM = """
 def home():
     return HTML_FORM
 
+
+# -----------------------------
+# 1. POST endpoint (form submit)
+# -----------------------------
 @app.route("/bmi-form", methods=["POST"])
 def bmi_form():
     try:
@@ -51,6 +55,36 @@ def bmi_form():
         """
     except:
         return "<h3>Invalid input. Please enter valid numbers.</h3><br><a href='/'>Try Again</a>"
+
+
+# -----------------------------
+# 2. GET endpoint (API style)
+# -----------------------------
+@app.route("/bmi", methods=["GET"])
+def bmi_get():
+    try:
+        weight = float(request.args.get("weight"))
+        height = float(request.args.get("height"))
+        bmi = weight / (height ** 2)
+
+        if bmi < 18.5:
+            category = "Underweight"
+        elif 18.5 <= bmi < 24.9:
+            category = "Normal weight"
+        elif 25 <= bmi < 29.9:
+            category = "Overweight"
+        else:
+            category = "Obesity"
+
+        return {
+            "weight": weight,
+            "height": height,
+            "bmi": round(bmi, 2),
+            "category": category
+        }
+    except:
+        return {"error": "Invalid input"}, 400
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
